@@ -83,8 +83,14 @@ def load_data(s):
     X[:,4] = normalization_standard(df.Parch)
     X[:,5] = normalization_standard(df.Fare)
 
+    '''
+    #相关更改序号180408
+    #相关函数 set_cabin0 change_cabin0
+    #建立cabin的列表
     if s == 0:
-        set_cabin(df.Cabin)
+        set_cabin0(df.Cabin)'''
+
+    set_Cabin_type(df)
     X[:,6] = normalization_standard([change_cabin(i) for i in df.Cabin])
     X[:,7] = normalization_standard([change_embarked(i) for i in df.Embarked])
 
@@ -101,7 +107,24 @@ def normalization_standard(d):
     return x
 
 def change_cabin(e):
-    ''' 将船舱的位置对应类型赋值 '''
+    ''' 有Canin信息则为1， 否则为0'''
+    x = 0.0
+    if e == "Yes":
+        x = 0.1
+    elif e == "No":
+        x = 0.0
+    return x
+
+def set_Cabin_type(df):
+    ''' 有Canin信息则为1， 否则为0'''
+    df.loc[ (df.Cabin.notnull()), 'Cabin' ] = "Yes"
+    df.loc[ (df.Cabin.isnull()), 'Cabin' ] = "No"
+    return df
+
+'''
+##相关更改序号180408
+def change_cabin0(e):
+    #将船舱的位置对应类型赋值
     fp = open("Titanic/data/cabin.pkl", "rb")
     counters = pickle.load(fp)
     fp.close() 
@@ -112,8 +135,8 @@ def change_cabin(e):
         pass
     return x
 
-def set_cabin(e):
-    ''' 建立一个cabin船仓的对应表 '''
+def set_cabin0(e):
+    #建立一个cabin船仓的对应表
     counters = {}
     x = 0.0
     for item in e:
@@ -125,6 +148,7 @@ def set_cabin(e):
     with open("Titanic/data/cabin.pkl", "wb") as fp:
         pickle.dump(counters, fp, pickle.HIGHEST_PROTOCOL)
         fp.close()
+'''
 
 def change_embarked(e):
     x = 0.0
@@ -135,7 +159,6 @@ def change_embarked(e):
     elif e == "Q":
         x = 0.3
     return x
-
 
 def load_data_wrapper():
 
