@@ -44,8 +44,6 @@ def load_data(s):
     df = set_Cabin_type(df) #将船仓类型变为——有 无
     dummies_Cabin = pd.get_dummies(df['Cabin'], prefix= 'Cabin')
     dummies_Embarked = pd.get_dummies(df['Embarked'], prefix= 'Embarked')
-    if s == 1: #填充一行Embarked_0.0，因为测试数据中没有缺失
-        df['Embarked_0.0'] = 0.0
     dummies_Sex = pd.get_dummies(df['Sex'], prefix= 'Sex')
     dummies_Pclass = pd.get_dummies(df['Pclass'], prefix= 'Pclass')
 
@@ -71,6 +69,7 @@ def load_data_wrapper():
     #将特征值取出并转换为矩阵
     train_df = train_data.filter(regex='Survived|Age_.*|SibSp|Parch|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*')
     train_np = train_df.as_matrix()
+    # print(train_df.dtypes) #查看不同列的数据类型
     # y即Survival结果
     trd_y = train_np[:, 0]
     # X即特征属性值
@@ -84,7 +83,7 @@ def load_data_wrapper():
     # y即Id
     test_y = test_data['PassengerId'].as_matrix()
     # X即特征属性值
-    test_X = test_np[:, 1:]
+    test_X = test_np
 
     return trd_X, trd_y, test_X, test_y
 
