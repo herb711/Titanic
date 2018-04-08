@@ -29,7 +29,6 @@ Embarked：上船地点，主要是S（南安普顿）、C（瑟堡）、Q（皇
 #### Libraries
 import pandas as pd 
 import numpy as np
-from sklearn.model_selection import train_test_split
 import sklearn.preprocessing as preprocessing
 import csv  
  

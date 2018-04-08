@@ -118,18 +118,25 @@ class Network(object):
         network outputs the correct result. Note that the neural
         network's output is assumed to be the index of whichever
         neuron in the final layer has the highest activation."""
-        test_results = [(np.argmax(self.feedforward(x)), y) #argmax 返回最大数的索引
+        test_results = [(np.argmax(self.feedforward(x)), np.argmax(y)) #argmax 返回最大数的索引
                         for (x, y) in test_data]
         return sum(int(x == y) for (x, y) in test_results)
 
-    def evaluate2(self, test_data):
+    def predict(self, X):
         """Return the number of test inputs for which the neural
         network outputs the correct result. Note that the neural
         network's output is assumed to be the index of whichever
         neuron in the final layer has the highest activation."""
-        test_results = [(y, np.argmax(self.feedforward(x))) #将ID(y)放前面
-                        for (x, y) in test_data]
-        return test_results
+        training_inputs = [np.reshape(i, (len(X[0]), 1)) for i in X] # 将一维数组变为二维矩阵[14,1]
+        test_results = [np.argmax(self.feedforward(i)) #argmax 返回最大数的索引
+                        for i in training_inputs]
+        return np.array(test_results) #转换为数组输出
+
+    def data_zip(self, X, y):
+        training_inputs = [np.reshape(i, (len(X[0]), 1)) for i in X] # 将一维数组变为二维矩阵[14,1]
+        training_results = [vectorized_result(i) for i in y] #转换为二维矩阵，因为最终输出节点为2
+        training_data = list(zip(training_inputs, training_results))
+        return training_data
 
     def cost_derivative(self, output_activations, y):
         """Return the vector of partial derivatives \partial C_x /
@@ -150,6 +157,16 @@ class Network(object):
             fp.close()
         return self.weights, self.biases
 
+def vectorized_result(j):
+    """Return a 10-dimensional unit vector with a 1.0 in the jth
+    position and zeroes elsewhere.  This is used to convert a digit
+    (0...1) into a corresponding desired output from the neural
+    network."""
+    i = int(j)
+    e = np.zeros((2, 1))
+    e[i] = 1.0
+    return e
+
 #### Miscellaneous functions
 def sigmoid(z):
     """The sigmoid function."""
@@ -167,8 +184,6 @@ def softmax(inputs):
     :return:
     """
     return np.exp(inputs) / float(sum(np.exp(inputs)))
-
-
 
 def tanh(z):
     return 2*sigmoid(2*z)-1
