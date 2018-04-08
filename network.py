@@ -24,7 +24,7 @@ import numpy as np
 class Network(object):
 
     def __init__(self, sizes):
-        print(sizes)
+        print('network',sizes)
         """ 初始化神经网络，sizes输入格式为[第一层神经元个数，第二层。。。]
            biase为每个神经元的偏移量，weight是神经元的权重数组  """
         self.num_layers = len(sizes)
@@ -54,8 +54,9 @@ class Network(object):
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
-                print( "Epoch {0}: {1} / {2}".format(
-                    j, self.evaluate(test_data), n_test) )
+                i = self.evaluate(test_data)
+                print( "Epoch {0}: {1} / {2} = {3}".format(
+                    j, i, n_test, round(i/n_test,6)) )
             else:
                 print( "Epoch {0} complete".format(j) )
 

@@ -18,6 +18,9 @@ class Regression(object):
         #简单评估
         return cross_validation.cross_val_score(self.clf, X, y, cv=5)
 
+    def evaluate2(self, X, y):
+        return self.clf.score(X, y) 
+
     def predict(self, X):
         #预测
         return self.clf.predict(X)
