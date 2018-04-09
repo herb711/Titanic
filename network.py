@@ -41,17 +41,17 @@ class Network(object):
 
     def SGD(self, training_data, epochs, mini_batch_size, eta,
             test_data=None):
-        print(epochs,mini_batch_size,eta)
+        print('SGD:',epochs,mini_batch_size,eta)
         """ 使用堆积梯度下降法训练神经网络的主要方法，
             训练数据集的格式是（x，y）其中x是输入，y是训练数据的标签 """
         if test_data: n_test = len(test_data)
         n = len(training_data)
-        for j in range(epochs):
+        for j in range(epochs): #训练次数
             random.shuffle(training_data) #对训练数据集随机排序
-            mini_batches = [
+            mini_batches = [ #以最小样本作为步长，从训练集切割数据到mini_batches
                 training_data[k:k+mini_batch_size]
                 for k in range(0, n, mini_batch_size)]
-            for mini_batch in mini_batches:
+            for mini_batch in mini_batches: #针对切割后的所有数据进行循环，mini_batch为最小样本集
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
                 i = self.evaluate(test_data)
@@ -59,6 +59,7 @@ class Network(object):
                     j, i, n_test, round(i/n_test,6)) )
             else:
                 print( "Epoch {0} complete".format(j) )
+        self.wb_save() #记录权重和基值
 
     def update_mini_batch(self, mini_batch, eta):
         """Update the network's weights and biases by applying
@@ -67,7 +68,7 @@ class Network(object):
         is the learning rate."""
         nabla_b = [np.zeros(b.shape) for b in self.biases] #按照偏置矩阵大小生成一个为0的矩阵
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-        for x, y in mini_batch:
+        for x, y in mini_batch: #循环全部最小样本集后，再进行权重和偏置值的调整 
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
@@ -122,6 +123,15 @@ class Network(object):
         test_results = [(np.argmax(self.feedforward(x)), np.argmax(y)) #argmax 返回最大数的索引
                         for (x, y) in test_data]
         return sum(int(x == y) for (x, y) in test_results)
+
+    def evaluate_print(self, test_data):
+        """Return the number of test inputs for which the neural
+        network outputs the correct result. Note that the neural
+        network's output is assumed to be the index of whichever
+        neuron in the final layer has the highest activation."""
+        test_results = self.evaluate(test_data)
+        print( "TrainTest : {0} / {1} = {2}".format(
+            test_results, len(test_data), round(test_results/len(test_data),6) ))
 
     def predict(self, X):
         """Return the number of test inputs for which the neural

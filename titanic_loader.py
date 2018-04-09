@@ -33,8 +33,7 @@ import sklearn.preprocessing as preprocessing
 import csv  
  
 
-def load_data(s):
-    ''' csv数据读取 '''
+def load_data(s):# csv数据读取
     if s == 0:
         df = pd.read_csv('Titanic/data/train.csv') #读取训练数据
     else:
@@ -46,8 +45,9 @@ def load_data(s):
     dummies_Embarked = pd.get_dummies(df['Embarked'], prefix= 'Embarked')
     dummies_Sex = pd.get_dummies(df['Sex'], prefix= 'Sex')
     dummies_Pclass = pd.get_dummies(df['Pclass'], prefix= 'Pclass')
+    dummies_Name = set_Name_type(df)
 
-    df = pd.concat([df, dummies_Cabin, dummies_Embarked, dummies_Sex, dummies_Pclass], axis=1)
+    df = pd.concat([df, dummies_Cabin, dummies_Embarked, dummies_Sex, dummies_Pclass, dummies_Name], axis=1)
     df.drop(['Pclass', 'Name', 'Sex', 'Ticket', 'Cabin', 'Embarked'], axis=1, inplace=True)
 
     # 用preprocessing模块做scaling
@@ -62,12 +62,25 @@ def load_data(s):
 
     return df
 
+def set_Cabin_type(df):
+    df.loc[ (df.Cabin.notnull()), 'Cabin' ] = "Yes"
+    df.loc[ (df.Cabin.isnull()), 'Cabin' ] = "No"
+    return df
+
+def set_Name_type(df):
+    ss = df['Name'].astype(str)
+    s1 = pd.get_dummies(ss.str.contains('Mr.',na=False), prefix= 'Mr') #将含有固定字符的设置为True，并将其转换为2个字段
+    s2 = pd.get_dummies(ss.str.contains('Mrs.',na=False), prefix= 'Mrs') 
+    s3 = pd.get_dummies(ss.str.contains('Miss.',na=False),prefix= 'Miss') 
+    dummies_Name = pd.concat([s1, s2, s3], axis=1)
+    return dummies_Name
+
 def load_data_wrapper():
 
     #读取训练数据
     train_data = load_data(0)
     #将特征值取出并转换为矩阵
-    train_df = train_data.filter(regex='Survived|Age_.*|SibSp|Parch|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*')
+    train_df = train_data.filter(regex='Survived|Age_.*|SibSp|Parch|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*|Mr|Mrs|Miss')
     train_np = train_df.as_matrix()
     # print(train_df.dtypes) #查看不同列的数据类型
     # y即Survival结果
@@ -78,7 +91,7 @@ def load_data_wrapper():
     #读取竞赛数据
     test_data = load_data(1)
     #将特征值取出
-    test_df = test_data.filter(regex='Age_.*|SibSp|Parch|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*')
+    test_df = test_data.filter(regex='Age_.*|SibSp|Parch|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*|Mr|Mrs|Miss')
     test_np = test_df.as_matrix()
     # y即Id
     test_y = test_data['PassengerId'].as_matrix()
@@ -86,11 +99,6 @@ def load_data_wrapper():
     test_X = test_np
 
     return trd_X, trd_y, test_X, test_y
-
-def set_Cabin_type(df):
-    df.loc[ (df.Cabin.notnull()), 'Cabin' ] = "Yes"
-    df.loc[ (df.Cabin.isnull()), 'Cabin' ] = "No"
-    return df
 
 def save_data(X, y):
     result = pd.DataFrame({'PassengerId':y.astype(np.int), 'Survived':X.astype(np.int32)})
