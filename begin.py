@@ -27,7 +27,8 @@ testing_data = net.data_zip(trd_X1,trd_y1)
 # 用（mini-batch）梯度下降法训练神经网络（权重与偏移），并生成测试结果。
 # 训练回合数=30, 用于随机梯度下降法的最小样本数=10，学习率=3.0
 net.SGD(training_data, 30, 10, 0.45, test_data=testing_data)
-net.evaluate_print(training_data) #打印评估结果
+error = net.evaluate_print(training_data) #打印评估结果
+titanic_loader.save_error(error) #记录不合格的数据
 result2 = net.predict(test_X) #进行预测
 
 #result_last = (result2 + result3 + result4 + result5 + result6)/5

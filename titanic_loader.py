@@ -59,6 +59,12 @@ def load_data(s):# csv数据读取
     df.Fare = df.Fare.fillna(value=0.0)
     fare_scale_param = scaler.fit(df['Fare'].values.reshape(-1,1))
     df['Fare_scaled'] = scaler.fit_transform(df['Fare'].values.reshape(-1,1), fare_scale_param) 
+    df.SibSp = df.SibSp.fillna(value=0.0)
+    scale_param = scaler.fit(df['SibSp'].values.reshape(-1,1))
+    df['SibSp_scaled'] = scaler.fit_transform(df['SibSp'].values.reshape(-1,1), scale_param) 
+    df.Parch = df.Parch.fillna(value=0.0)
+    scale_param = scaler.fit(df['Parch'].values.reshape(-1,1))
+    df['Parch_scaled'] = scaler.fit_transform(df['Parch'].values.reshape(-1,1), scale_param) 
 
     return df
 
@@ -69,9 +75,9 @@ def set_Cabin_type(df):
 
 def set_Name_type(df):
     ss = df['Name'].astype(str)
-    s1 = pd.get_dummies(ss.str.contains('Mr.',na=False), prefix= 'Mr') #将含有固定字符的设置为True，并将其转换为2个字段
-    s2 = pd.get_dummies(ss.str.contains('Mrs.',na=False), prefix= 'Mrs') 
-    s3 = pd.get_dummies(ss.str.contains('Miss.',na=False),prefix= 'Miss') 
+    s1 = pd.get_dummies(ss.str.contains('Mr.',na=False), prefix= 'Name_Mr') #将含有固定字符的设置为True，并将其转换为2个字段
+    s2 = pd.get_dummies(ss.str.contains('Mrs.',na=False), prefix= 'Name_Mrs') 
+    s3 = pd.get_dummies(ss.str.contains('Miss.',na=False),prefix= 'Name_Miss') 
     dummies_Name = pd.concat([s1, s2, s3], axis=1)
     return dummies_Name
 
@@ -80,7 +86,9 @@ def load_data_wrapper():
     #读取训练数据
     train_data = load_data(0)
     #将特征值取出并转换为矩阵
-    train_df = train_data.filter(regex='Survived|Age_.*|SibSp|Parch|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*|Mr|Mrs|Miss')
+ #   train_df = train_data.filter(regex='Survived|Age_.*|SibSp|Parch|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*|Mr|Mrs|Miss')
+    train_df = train_data.filter(regex='Survived|Age_scaled|SibSp_scaled|Parch_scaled|Fare_scaled|Cabin_.*|Sex_.*|Pclass_.*|Name_.*')
+    #print(train_df.columns) # 打印列索引
     train_np = train_df.as_matrix()
     # print(train_df.dtypes) #查看不同列的数据类型
     # y即Survival结果
@@ -91,7 +99,7 @@ def load_data_wrapper():
     #读取竞赛数据
     test_data = load_data(1)
     #将特征值取出
-    test_df = test_data.filter(regex='Age_.*|SibSp|Parch|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*|Mr|Mrs|Miss')
+    test_df = test_data.filter(regex='Age_scaled|SibSp_scaled|Parch_scaled|Fare_scaled|Cabin_.*|Sex_.*|Pclass_.*|Name_.*')
     test_np = test_df.as_matrix()
     # y即Id
     test_y = test_data['PassengerId'].as_matrix()
@@ -103,6 +111,14 @@ def load_data_wrapper():
 def save_data(X, y):
     result = pd.DataFrame({'PassengerId':y.astype(np.int), 'Survived':X.astype(np.int32)})
     result.to_csv("Titanic/data/result.csv", index=False)
+
+def save_error(X):
+    with open('Titanic/data/error.csv',"w") as csvfile: 
+        writer = csv.writer(csvfile)
+        #先写入columns_name
+        #writer.writerow(["PassengerId","Survived"])
+        #写入多行用writerows
+        writer.writerows(X)
 
 
 load_data_wrapper()

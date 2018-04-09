@@ -129,9 +129,20 @@ class Network(object):
         network outputs the correct result. Note that the neural
         network's output is assumed to be the index of whichever
         neuron in the final layer has the highest activation."""
-        test_results = self.evaluate(test_data)
+        test_results = [(np.argmax(self.feedforward(x)), np.argmax(y)) #argmax 返回最大数的索引
+                        for (x, y) in test_data]
+        #统计预测错误的数据特征
+        error = []
+        for i, (x, y) in enumerate(test_results):
+            if (x!=y):
+                error.append(test_data[i][0])
+        error = np.insert(error, 0, values=y, axis=1) #将正确答案插入第一行
+        right = sum(int(x == y) for (x, y) in test_results)
+        #打印出用全部测试集进行测试得到的结果
         print( "TrainTest : {0} / {1} = {2}".format(
-            test_results, len(test_data), round(test_results/len(test_data),6) ))
+            right, len(test_data), round(right/len(test_data),6) ))
+        return error
+        
 
     def predict(self, X):
         """Return the number of test inputs for which the neural
